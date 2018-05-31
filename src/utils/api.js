@@ -133,11 +133,20 @@ const logout = async (params = {}) => {
   return logoutResponse
 }
 
+const showErrorModal = async (err) => {
+  console.log(err)
+  wepy.showModal({
+    title: '提示',
+    content: '服务器错误，请联系管理员'
+  })
+}
+
 export default {
     request,
     login,
     refreshToken,
     getToken,
     authRequest,
-    logout
+    logout,
+    showErrorModal
 }
