@@ -99,7 +99,7 @@
             <view class="weui-panel weui-panel_access">
                 <view class="weui-panel__bd">
                     <repeat for="{{ topics }}" key="id" index="index" item="topic">
-                        <navigator url="" class="weui-media-box weui-media-box_appmsg" hover-class="weui-cell_active">
+                        <navigator url="/pages/topics/show?id={{ topic.id }}" class="weui-media-box weui-media-box_appmsg" hover-class="weui-cell_active">
                             <view class="weui-media-box__hd weui-media-box__hd_in-appmsg">
                                 <image class="weui-media-box__thumb" src="{{ topic.user.avatar }}"/>
                             </view>
@@ -127,7 +127,7 @@
 <script>
   import wepy from 'wepy'
   import api from '@/utils/api'
-  import utils from '@/utils/utils'
+  import util from '@/utils/util'
 
   export default class TopicsIndex extends wepy.page {
     config = {
@@ -162,7 +162,7 @@
         })
         let topics = topicsResponse.data.data
         topics.forEach(function (topic) {
-          topic.updated_at_diff = utils.diffForHumans(topic.updated_at)
+          topic.updated_at_diff = util.diffForHumans(topic.updated_at)
         })
         // 如果传入参数 reset 为true，则覆盖 topics
         this.topics = reset ? topics : this.topics.concat(topics)
