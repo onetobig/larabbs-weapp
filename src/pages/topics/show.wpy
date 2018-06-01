@@ -46,6 +46,9 @@
             </view>
             <view class="weui-article">
                 <rich-text nodes="{{ topic.body }}" bindtap="tap"></rich-text>
+                <button wx:if="{{ canDelete }}" @tap="deleteTopic" class="weui-btn mini-btn" type="default" size="mini">
+                    删除
+                </button>
             </view>
         </view>
     </view>
@@ -62,6 +65,68 @@
     }
     data = {
       topic: null
+    }
+    // 计算的属性
+    computed = {
+      // 是否可以删除话题
+      canDelete() {
+        if (!this.topic || !this.user) {
+          return false
+        }
+        return this.topic.user.id === this.user.id
+      }
+    }
+
+    methods = {
+      async deleteTopic() {
+        let res = await wepy.showModal({
+          title: '确认删除',
+          content: '您确认删除该话题吗',
+          confirmText: '删除',
+          cancelText: '取消'
+        })
+
+        // 点击取消返回
+        if (!res.confirm) {
+          return false
+        }
+
+        let deleteResponse = await api.authRequest({
+          url: 'topics/' + this.topic.id,
+          method: 'DELETE'
+        })
+
+        if (deleteResponse.statusCode === 204) {
+          wepy.showToast({
+            title: '删除成功',
+            icon: 'success'
+          })
+        }
+
+        // 设置全局变量，控制列表刷新
+        let pages = this.getCurrentPages()
+        // 如果有上一页
+        if (pages.length > 1) {
+          // 检查打开的页面，如果是话题列表页面就记录下来
+          let refreshPages = []
+          let tapPages = [
+            'pages/topics/index',
+            'pages/topics/userIndex'
+          ]
+          pages.forEach((page) => {
+            // 已打开的页面中包含 话题列表 或 用户的话题列表
+            if (tapPages.indexOf(page.route) !== -1) {
+              refreshPages.push(page.route)
+            }
+          })
+          this.$parent.globalData.refreshPages = this.$parent.globalData.refreshPages.concat(refreshPages)
+          this.$apply()
+        }
+        // 2 秒后返回上一页
+        setTimeout(function() {
+          wepy.navigateBack()
+        }, 2000)
+      }
     }
     // 获取话题数据
     async getTopic(id) {
@@ -81,8 +146,11 @@
         api.showErrorModal(err)
       }
     }
-    onLoad(options) {
+
+    async onLoad(options) {
       this.getTopic(options.id)
+      this.user = await this.$parent.getCurrentUser()
+      this.$apply()
     }
   }
 </script>
