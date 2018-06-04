@@ -17,11 +17,11 @@
                             <navigator class="weui-media-box weui-media-box__hd_in-appmsg" url="/pages/users/show?id={{ reply.user.id }}">
                                 <image class="replyer-avatar weui-media-box__thumb" src="{{ reply.user.avatar }}" />
                             </navigator>
-                            <view class="weui-media-box__bd weui-media-box__bd_in-appmsg">
-                                <view class="weui-media-box__title">{{ reply.user.name }}</view>
+                            <navigator class="weui-media-box__bd weui-media-box__bd_in-appmsg" url="/pages/topics/show?id={{ reply.topic.id }}">
+                                <view class="weui-media-box__title">{{ reply.topic.title }}</view>
                                 <view class="weui-media-box__desc"><rich-text nodes="{{ reply.content }}" bindtap="tap"></rich-text></view>
                                 <view class="weui-media-box__info__meta">{{ reply.created_at_diff }}</view>
-                            </view>
+                            </navigator>
                         </view>
                     </repeat>
                     <view class="weui-loadmore weui-loadmore_line" wx:if="{{ noMoreData }}">
@@ -36,12 +36,12 @@
   import wepy from 'wepy'
   import replyMixin from '@/mixins/replyMixin'
 
-  export default class ReplyIndex extends wepy.page {
+  export default class ReplyUserIndex extends wepy.page {
     config = {
       // 可以下拉刷新
       enablePullDownRefresh: true,
       // 页面标题
-      navigationBarTitleText: '回复列表'
+      navigationBarTitleText: '用户回复列表'
     }
 
     data = {
@@ -51,7 +51,8 @@
     mixins = [replyMixin]
 
     async onLoad(options) {
-      this.requestData.url = 'topics/' + options.topic_id + '/replies'
+      this.requestData.url = 'users/' + options.user_id + '/replies'
+      this.requestData.include = 'user,topic'
       this.getReplies()
     }
   }

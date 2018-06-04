@@ -18,6 +18,14 @@
     .topic-title {
         padding: 15px;
     }
+
+    .replyer-avatar {
+        padding: 4px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        width: 50px;
+        height: 50px;
+    }
 </style>
 <template>
     <view class="page">
@@ -51,19 +59,21 @@
                 </button>
             </view>
 
-            <!--话题回复-->
+            <!-- 话题回复 -->
             <view class="weui-panel weui-panel_access" wx:if="{{ topic.reply_count }}">
                 <view class="weui-panel__hd">回复 ({{ topic.reply_count }})</view>
                 <view class="weui-panel__bd">
                     <repeat for="{{ topic.topReplies.data }}" wx:key="id" index="index" item="reply">
                         <view class="weui-media-box weui-media-box_appmsg" hover-class="weui-cell_active">
-                            <navigator class="weui-media-box weui-media-box__hd_in-appmsg" url="/pages/users/show?id={{ reply.user.id }}">
+                            <navigator class="weui-media-box__hd weui-media-box__hd_in-appmsg" url="/pages/users/show?id={{ reply.user.id }}">
                                 <image class="replyer-avatar weui-media-box__thumb" src="{{ reply.user.avatar }}" />
                             </navigator>
-                            <view class="weui-media-box__bd weui-meida-box__bd_in-appmsg">
+                            <view class="weui-media-box__bd weui-media-box__bd_in-appmsg">
                                 <view class="weui-media-box__title">{{ reply.user.name }}</view>
                                 <view class="weui-media-box__desc"><rich-text nodes="{{ reply.content }}" bindtap="tap"></rich-text></view>
-                                <view class="weui-media-box__info__meta">{{ reply.created_at_diff }}</view>
+                                <view class="weui-media-box__info">
+                                    <view class="weui-media-box__info__meta">{{ reply.created_at_diff }}</view>
+                                </view>
                             </view>
                         </view>
                     </repeat>
@@ -145,7 +155,7 @@
 
           // 处理回复数据时间
           topic.topReplies.data.forEach(function (reply) {
-            reply.reated_at_diff = util.diffForHumans(reply.created_at)
+            reply.created_at_diff = util.diffForHumans(reply.created_at)
           })
 
           this.topic = topic
