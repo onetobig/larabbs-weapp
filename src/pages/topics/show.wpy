@@ -50,6 +50,31 @@
                     删除
                 </button>
             </view>
+
+            <!--话题回复-->
+            <view class="weui-panel weui-panel_access" wx:if="{{ topic.reply_count }}">
+                <view class="weui-panel__hd">回复 ({{ topic.reply_count }})</view>
+                <view class="weui-panel__bd">
+                    <repeat for="{{ topic.topReplies.data }}" wx:key="id" index="index" item="reply">
+                        <view class="weui-media-box weui-media-box_appmsg" hover-class="weui-cell_active">
+                            <navigator class="weui-media-box weui-media-box__hd_in-appmsg" url="/pages/users/show?id={{ reply.user.id }}">
+                                <image class="replyer-avatar weui-media-box__thumb" src="{{ reply.user.avatar }}" />
+                            </navigator>
+                            <view class="weui-media-box__bd weui-meida-box__bd_in-appmsg">
+                                <view class="weui-media-box__title">{{ reply.user.name }}</view>
+                                <view class="weui-media-box__desc"><rich-text nodes="{{ reply.content }}" bindtap="tap"></rich-text></view>
+                                <view class="weui-media-box__info__meta">{{ reply.created_at_diff }}</view>
+                            </view>
+                        </view>
+                    </repeat>
+                </view>
+                <view class="weui-panel__ft">
+                    <navigator class="weui-cell weui-cell_access weui-cell_link" url="/pages/replies/index?topic_id={{ topic.id }}">
+                        <view class="weui-cell__bd">查看全部回复</view>
+                        <view class="weui-cell__ft weui-cell__ft_in-access"></view>
+                    </navigator>
+                </view>
+            </view>
         </view>
     </view>
 </template>
@@ -102,30 +127,7 @@
             icon: 'success'
           })
         }
-
-        // 设置全局变量，控制列表刷新
-        let pages = this.getCurrentPages()
-        // 如果有上一页
-        if (pages.length > 1) {
-          // 检查打开的页面，如果是话题列表页面就记录下来
-          let refreshPages = []
-          let tapPages = [
-            'pages/topics/index',
-            'pages/topics/userIndex'
-          ]
-          pages.forEach((page) => {
-            // 已打开的页面中包含 话题列表 或 用户的话题列表
-            if (tapPages.indexOf(page.route) !== -1) {
-              refreshPages.push(page.route)
-            }
-          })
-          this.$parent.globalData.refreshPages = this.$parent.globalData.refreshPages.concat(refreshPages)
-          this.$apply()
-        }
-        // 2 秒后返回上一页
-        setTimeout(function() {
-          wepy.navigateBack()
-        }, 2000)
+        await this.goBackAndRefresh(2000)
       }
     }
     // 获取话题数据
@@ -134,17 +136,56 @@
         let topicResponse = await api.request({
           url: 'topics/' + id,
           data: {
-            include: 'user,category'
+            include: 'user,category,topReplies.user'
           }
         })
-        let topic = topicResponse.data
-        topic.updated_at_diff = util.diffForHumans(topic.updated_at)
+        if (topicResponse.statusCode === 200) {
+          let topic = topicResponse.data
+          topic.updated_at_diff = util.diffForHumans(topic.updated_at)
 
-        this.topic = topic
-        this.$apply()
+          // 处理回复数据时间
+          topic.topReplies.data.forEach(function (reply) {
+            reply.reated_at_diff = util.diffForHumans(reply.created_at)
+          })
+
+          this.topic = topic
+          this.$apply()
+        }
+
+        if (topicResponse.statusCode === 404) {
+          this.goBackAndRefresh()
+        }
+
+        return topicResponse
       } catch (err) {
         api.showErrorModal(err)
       }
+    }
+
+    async goBackAndRefresh(time = 0) {
+      // 设置全局变量，控制列表刷新
+      let pages = this.getCurrentPages()
+      // 如果有上一页
+      if (pages.length > 1) {
+        // 检查打开的页面，如果是话题列表页面就记录下来
+        let refreshPages = []
+        let tapPages = [
+          'pages/topics/index',
+          'pages/topics/userIndex'
+        ]
+        pages.forEach((page) => {
+          // 已打开的页面中包含 话题列表 或 用户的话题列表
+          if (tapPages.indexOf(page.route) !== -1) {
+            refreshPages.push(page.route)
+          }
+        })
+        this.$parent.globalData.refreshPages = this.$parent.globalData.refreshPages.concat(refreshPages)
+        this.$apply()
+      }
+      // 2 秒后返回上一页
+      setTimeout(function() {
+        wepy.navigateBack()
+      }, time)
     }
 
     async onLoad(options) {
