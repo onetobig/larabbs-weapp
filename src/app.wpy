@@ -120,6 +120,8 @@ export default class extends wepy.app {
     setInterval(() => {
       this.updateUnreadCount()
     }, 60000)
+    // 获取用户权限
+    this.getPerms()
   }
   async updateUnreadCount() {
     // 未登录不需要请求
@@ -142,6 +144,45 @@ export default class extends wepy.app {
     }
     this.globalData.refreshPages.splice(refreshIndex, 1)
     callback && callback()
+  }
+
+  // 获取用户权限
+  async getPerms() {
+    let perms = []
+
+    if (!this.checkLogin()) {
+      return perms
+    }
+
+    perms = wepy.getStorageSync('perms')
+    if (perms !== '') {
+      return perms
+    }
+    try {
+      let permsResponse = await api.authRequest('user/permissions', false)
+      if (permsResponse.statusCode === 200) {
+        perms = permsResponse.data.data
+        wepy.setStorageSync('perms', perms)
+      }
+    } catch (err) {
+      api.showErrorModal(err)
+    }
+
+    return perms
+  }
+
+  // 判断用户权限
+  can(targetPerm) {
+    if (!this.checkLogin()) {
+      return false
+    }
+
+    let perms = wepy.getStorageSync('perms') || []
+
+    if (perms.find(perm => perm.name === targetPerm)) {
+      return true
+    }
+    return false
   }
 }
 </script>

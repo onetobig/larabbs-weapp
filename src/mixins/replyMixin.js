@@ -9,7 +9,7 @@ export default class ReplyMixin extends wepy.mixin {
   }
 
   data = {
-  // 回复数据
+    // 回复数据
     replies: [],
     noMoreData: false,
     isLoading: false,
@@ -58,7 +58,7 @@ export default class ReplyMixin extends wepy.mixin {
       return false
     }
 
-    return (reply.user_id === user.id)
+    return (reply.user_id === user.id || this.$parent.can('manage_contents'))
   }
 
   async onPullDownRefresh() {
@@ -89,7 +89,7 @@ export default class ReplyMixin extends wepy.mixin {
         cancelText: '取消'
       })
 
-      if(!res.confirm) {
+      if (!res.confirm) {
         return
       }
       try {
