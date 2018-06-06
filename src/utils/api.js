@@ -1,6 +1,6 @@
 import wepy from 'wepy'
 
-const host = 'http://larabbs.test/api'
+const host = 'http://larabbs.demo/api'
 
 // 普通请求
 const request = async (options, showLoading = true) => {

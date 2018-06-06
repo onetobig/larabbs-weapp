@@ -48,7 +48,8 @@
                </navigator>
                <navigator class="weui-cell weui-cell_access" url="">
                    <view class="weui-cell__bd" url="">
-                       <view class="weui-cell__bd">我的消息</view>
+                       <view class="weui-cell__bd" style="display: inline-block; vertical-align:middle;">我的消息</view>
+                       <view class="weui-badge" style="margin-left: 5px" wx:if="{{ unreadCount }}">{{ unreadCount }}</view>
                    </view>
                    <view class="weui-cell__ft weui-cell__ft_in-access"></view>
                </navigator>
@@ -76,6 +77,7 @@
 <script>
   import wepy from 'wepy'
   import api from '@/utils/api'
+  import unreadCount from '@/mixins/unreadCount'
 
   export default class UserMe extends wepy.page {
     config = {
@@ -90,6 +92,8 @@
       this.user = await this.$parent.getCurrentUser()
       this.$apply()
     }
+
+    mixins = [unreadCount]
 
     methods = {
       async logout (e) {

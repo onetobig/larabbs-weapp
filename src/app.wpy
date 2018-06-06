@@ -79,9 +79,6 @@ export default class extends wepy.app {
     this.use('requestfix')
   }
 
-  onLaunch() {
-  }
-
   async getCurrentUser () {
     // 如果用户未登录
     if (!this.checkLogin()) {
@@ -111,9 +108,32 @@ export default class extends wepy.app {
   }
 
   globalData = {
-    refreshPages: []
+    refreshPages: [],
+    unreadCount: 0
   }
 
+  onLaunch() {
+    // 小程序启动，调用一次获取未读消息数
+    this.updateUnreadCount()
+    // 每隔 60 秒，调用一次未读消息数
+    setInterval(() => {
+      this.updateUnreadCount()
+    }, 60000)
+  }
+  async updateUnreadCount() {
+    // 未登录不需要请求
+    if (!this.checkLogin()) {
+      return false
+    }
+
+    // 请求消息统计接口
+    let notificationResponse = await api.authRequest('user/notifications/stats', false)
+
+    // 请求成功，赋值全局变量 unreadCount
+    if (notificationResponse.statusCode === 200) {
+      this.globalData.unreadCount = notificationResponse.data.unread_count
+    }
+  }
   checkRefreshPages (route, callback) {
     let refreshIndex = this.globalData.refreshPages.indexOf(route)
     if (refreshIndex === -1) {
