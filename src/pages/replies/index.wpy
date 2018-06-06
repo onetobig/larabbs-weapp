@@ -6,6 +6,10 @@
         width: 50px;
         height: 50px;
     }
+    .reply-delete {
+        width: 20px;
+        height: 20px;
+    }
 </style>
 <template>
     <view class="page">
@@ -22,6 +26,8 @@
                                 <view class="weui-media-box__desc"><rich-text nodes="{{ reply.content }}" bindtap="tap"></rich-text></view>
                                 <view class="weui-media-box__info__meta">{{ reply.created_at_diff }}</view>
                             </view>
+
+                            <image wx:if="{{ reply.can_delete }}" class="reply-delete" src="/images/trash.png" @tap="deleteReply({{ reply.topic_id }}, {{ reply.id }})"/>
                         </view>
                     </repeat>
                     <view class="weui-loadmore weui-loadmore_line" wx:if="{{ noMoreData }}">
