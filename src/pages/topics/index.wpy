@@ -85,6 +85,7 @@
   import wepy from 'wepy'
   import api from '@/utils/api'
   import topicList from '@/components/topicList'
+  import unreadCount from '@/mixins/unreadCount'
 
   export default class TopicsIndex extends wepy.page {
     config = {
@@ -123,6 +124,8 @@
       this.getCategories()
       this.$invoke('topiclist', 'reload')
     }
+
+    mixins = [unreadCount]
 
     async getCategories() {
       let categories = wepy.getStorageSync('categories')
